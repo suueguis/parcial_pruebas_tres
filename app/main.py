@@ -1,5 +1,7 @@
 """Punto de entrada de la API de reservas de TicketFast."""
 
+from contextlib import asynccontextmanager
+
 from fastapi import Depends, FastAPI, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -9,13 +11,15 @@ from app.models import ReservaDB
 from app.precios import calcular_total
 from app.schemas import ReservaCrear, ReservaRespuesta, ResumenEvento
 
-app = FastAPI(title="TicketFast API")
 
-
-@app.on_event("startup")
-def inicializar_base_de_datos() -> None:
-    """Crea las tablas declaradas si aún no existen."""
+@asynccontextmanager
+async def ciclo_de_vida(_: FastAPI):
+    """Crea las tablas declaradas al iniciar la aplicación."""
     Base.metadata.create_all(bind=engine)
+    yield
+
+
+app = FastAPI(title="TicketFast API", lifespan=ciclo_de_vida)
 
 
 @app.post(
