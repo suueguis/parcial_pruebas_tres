@@ -3,6 +3,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, status
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -20,6 +21,13 @@ async def ciclo_de_vida(_: FastAPI):
 
 
 app = FastAPI(title="TicketFast API", lifespan=ciclo_de_vida)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.post(
